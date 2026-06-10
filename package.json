@@ -1,0 +1,23 @@
+{
+  "name": "landing-creation",
+  "version": "0.6.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p $PORT",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.3.3",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
