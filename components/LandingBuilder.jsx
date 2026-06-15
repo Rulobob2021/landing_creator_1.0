@@ -144,6 +144,8 @@ const mkDefault = (struct = "clasica") => ({
     showPrivacyCheck: true,
     bgColor: DARK,
     textColor: "#ffffff",
+    showInHero: struct === "clasica",
+    showInFooter: struct === "profesional",
   },
   footer: {
     bgColor: DARK, textColor: "#cccccc", company: "MiMarca S.A.",
@@ -194,14 +196,14 @@ const buildPreviewHTML = (d, full = false) => {
   const s = d.struct || "clasica";
   const slides = (d.hero.slides || []).filter(Boolean);
   const P = full ? "50px" : "24px";
-  const hH = s === "clasica" ? (full ? 520 : 280) : (full ? 460 : 220);
+  const hH = (d.form && d.form.showInHero) ? (full ? 520 : 280) : (full ? 460 : 220);
 
   const hdr = `<header style="background:${d.header.bgColor};padding:0 ${P};height:${full ? 58 : 44}px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100">
     <span style="color:${d.header.textColor};font-weight:700;font-size:${full ? 19 : 13}px">${d.header.logoUrl ? `<img src="${d.header.logoUrl}" style="height:${full ? 30 : 22}px;object-fit:contain">` : d.header.logoText}</span>
     <nav style="display:flex;gap:${full ? 20 : 12}px">${(d.header.menu || []).map(m => `<a href="${m.h}" style="color:${d.header.textColor};text-decoration:none;font-size:${full ? 13 : 10}px">${m.l}</a>`).join("")}</nav>
   </header>`;
 
-  const heroFormHTML = s === "clasica" ? (() => {
+  const heroFormHTML = (d.form && d.form.showInHero) ? (() => {
     const f = d.form || {};
     const P2 = full ? "10px 12px" : "4px 6px";
     const fields = (f.fields || []).map(field => `<div style="margin-bottom:${full ? 10 : 4}px"><label style="display:block;color:${f.textColor || "#fff"};font-size:${full ? 11 : 7}px;margin-bottom:${full ? 3 : 1}px;opacity:.85">${field.label}${field.required ? '<span style="color:#ef4444;margin-left:2px">*</span>' : ""}</label>${field.type === "textarea" ? `<textarea placeholder="${field.placeholder}" rows="${full ? 3 : 2}" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:${P2};color:${f.textColor || "#fff"};font-size:${full ? 12 : 8}px;resize:none;box-sizing:border-box"></textarea>` : `<input type="${field.type || "text"}" placeholder="${field.placeholder}" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:${P2};color:${f.textColor || "#fff"};font-size:${full ? 12 : 8}px;box-sizing:border-box">`}</div>`).join("");
@@ -214,7 +216,7 @@ const buildPreviewHTML = (d, full = false) => {
     <div style="position:absolute;bottom:${full ? 14 : 8}px;left:50%;transform:translateX(-50%);display:flex;gap:5px">
       ${slides.map((_, i) => `<div class="hero-dt" style="width:${full ? 7 : 5}px;height:${full ? 7 : 5}px;border-radius:50%;background:#fff;opacity:${i === 0 ? 1 : 0.4};transition:opacity .3s;cursor:pointer"></div>`).join("")}
     </div>
-    ${s === "clasica"
+    ${(d.form && d.form.showInHero)
       ? `<div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:space-between;padding:0 ${full ? 50 : 16}px;gap:${full ? 24 : 12}px">
           <div style="flex:1;text-align:left">
             <h1 style="color:#fff;font-size:${full ? 42 : 19}px;font-weight:700;margin-bottom:${full ? 14 : 7}px;line-height:1.2">${d.hero.title}</h1>
@@ -416,33 +418,54 @@ const buildPreviewHTML = (d, full = false) => {
     `;
   };
 
+  const showFooterForm = d.form && d.form.showInFooter;
   const ftr = s === "profesional"
     ? `<footer id="footer" style="background:${d.footer.bgColor};padding:${full?46:22}px ${P} ${full?20:12}px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:${full?40:20}px;margin-bottom:${full?24:12}px">
-          <div>
-            <div style="color:#fff;font-weight:700;font-size:${full?20:12}px;margin-bottom:${full?8:5}px">${d.header.logoText}</div>
-            <p style="color:${d.footer.textColor};font-size:${full?15:8}px;line-height:1.65;margin-bottom:${full?12:6}px">${d.footer.desc}</p>
-            <div style="color:${d.footer.textColor};font-size:${full?12:8}px;margin-bottom:${full?5:3}px">📍 ${d.footer.address}</div>
-            <div style="color:${d.footer.textColor};font-size:${full?12:8}px">${d.footer.email}</div>
-          </div>
-          <div>${formHTML(d.form, full)}</div>
-        </div>
+        ${showFooterForm
+          ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:${full?40:20}px;margin-bottom:${full?24:12}px">
+              <div>
+                <div style="color:#fff;font-weight:700;font-size:${full?20:12}px;margin-bottom:${full?8:5}px">${d.header.logoText}</div>
+                <p style="color:${d.footer.textColor};font-size:${full?15:8}px;line-height:1.65;margin-bottom:${full?12:6}px">${d.footer.desc}</p>
+                <div style="color:${d.footer.textColor};font-size:${full?12:8}px;margin-bottom:${full?5:3}px">📍 ${d.footer.address}</div>
+                <div style="color:${d.footer.textColor};font-size:${full?12:8}px">${d.footer.email}</div>
+              </div>
+              <div>${formHTML(d.form, full)}</div>
+            </div>`
+          : `<div style="margin-bottom:${full?24:12}px">
+              <div style="color:#fff;font-weight:700;font-size:${full?20:12}px;margin-bottom:${full?8:5}px">${d.header.logoText}</div>
+              <p style="color:${d.footer.textColor};font-size:${full?15:8}px;line-height:1.65;margin-bottom:${full?12:6}px">${d.footer.desc}</p>
+              <div style="color:${d.footer.textColor};font-size:${full?12:8}px;margin-bottom:${full?5:3}px">📍 ${d.footer.address}</div>
+              <div style="color:${d.footer.textColor};font-size:${full?12:8}px">${d.footer.email}</div>
+            </div>`
+        }
         <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:${full?10:6}px;text-align:center">
           <span style="color:${d.footer.textColor};font-size:${full?10:7}px;opacity:.6">${d.footer.copy}</span>
         </div>
       </footer>`
     : `<footer id="footer" style="background:${d.footer.bgColor};padding:${full?46:22}px ${P} ${full?20:12}px">
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:${full?36:16}px;margin-bottom:${full?24:12}px">
-          <div><div style="color:#fff;font-weight:700;font-size:${full?17:12}px;margin-bottom:7px">${d.footer.company}</div>
-            <p style="color:${d.footer.textColor};font-size:${full?15:9}px;line-height:1.65">${d.footer.desc}</p></div>
-          <div><div style="color:#fff;font-weight:600;font-size:${full?10:8}px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Contacto</div>
-            <div style="color:${d.footer.textColor};font-size:${full?11:8}px;margin-bottom:4px">${d.footer.email}</div>
-            <div style="color:${d.footer.textColor};font-size:${full?11:8}px;margin-bottom:4px">${d.footer.phone}</div>
-            <div style="color:${d.footer.textColor};font-size:${full?11:8}px">${d.footer.address}</div></div>
-          <div><div style="color:#fff;font-weight:600;font-size:${full?10:8}px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Navegación</div>
-            ${(d.header.menu || []).map(m => `<div style="margin-bottom:5px"><a href="${m.h}" style="color:${d.footer.textColor};font-size:${full?11:8}px;text-decoration:none;opacity:.8">${m.l}</a></div>`).join("")}
-          </div>
-        </div>
+        ${showFooterForm
+          ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:${full?36:16}px;margin-bottom:${full?24:12}px">
+              <div>
+                <div style="color:#fff;font-weight:700;font-size:${full?17:12}px;margin-bottom:7px">${d.footer.company}</div>
+                <p style="color:${d.footer.textColor};font-size:${full?15:9}px;line-height:1.65;margin-bottom:${full?10:5}px">${d.footer.desc}</p>
+                <div style="color:${d.footer.textColor};font-size:${full?11:8}px;margin-bottom:4px">${d.footer.email}</div>
+                <div style="color:${d.footer.textColor};font-size:${full?11:8}px;margin-bottom:4px">${d.footer.phone}</div>
+                <div style="color:${d.footer.textColor};font-size:${full?11:8}px">${d.footer.address}</div>
+              </div>
+              <div>${formHTML(d.form, full)}</div>
+            </div>`
+          : `<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:${full?36:16}px;margin-bottom:${full?24:12}px">
+              <div><div style="color:#fff;font-weight:700;font-size:${full?17:12}px;margin-bottom:7px">${d.footer.company}</div>
+                <p style="color:${d.footer.textColor};font-size:${full?15:9}px;line-height:1.65">${d.footer.desc}</p></div>
+              <div><div style="color:#fff;font-weight:600;font-size:${full?10:8}px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Contacto</div>
+                <div style="color:${d.footer.textColor};font-size:${full?11:8}px;margin-bottom:4px">${d.footer.email}</div>
+                <div style="color:${d.footer.textColor};font-size:${full?11:8}px;margin-bottom:4px">${d.footer.phone}</div>
+                <div style="color:${d.footer.textColor};font-size:${full?11:8}px">${d.footer.address}</div></div>
+              <div><div style="color:#fff;font-weight:600;font-size:${full?10:8}px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Navegación</div>
+                ${(d.header.menu || []).map(m => `<div style="margin-bottom:5px"><a href="${m.h}" style="color:${d.footer.textColor};font-size:${full?11:8}px;text-decoration:none;opacity:.8">${m.l}</a></div>`).join("")}
+              </div>
+            </div>`
+        }
         <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:10px;text-align:center">
           <span style="color:${d.footer.textColor};font-size:${full?10:8}px;opacity:.6">${d.footer.copy}</span>
         </div>
@@ -998,6 +1021,21 @@ const EditorSidebar = ({ data, setData, onSave }) => {
               <p style={{ fontSize: 10, color: "#9ca3af", marginBottom: 10, lineHeight: 1.5 }}>
                 Elige entre un formulario básico editable o pega el código embed de HubSpot, Typeform, ActiveCampaign u otro sistema.
               </p>
+              {/* Location toggles */}
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 10, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".5px", display: "block", marginBottom: 6 }}>Mostrar formulario en</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer", padding: "8px 10px", borderRadius: 7, border: `1px solid ${f.showInHero ? ACC : "#e5e7eb"}`, background: f.showInHero ? "#fffbeb" : "#fff" }}>
+                    <input type="checkbox" checked={!!f.showInHero} onChange={e => updF("showInHero", e.target.checked)} style={{ accentColor: ACC, width: 14, height: 14 }} />
+                    <span style={{ fontWeight: f.showInHero ? 600 : 400, color: f.showInHero ? DARK : "#6b7280" }}>🖼 Formulario en Hero</span>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer", padding: "8px 10px", borderRadius: 7, border: `1px solid ${f.showInFooter ? ACC : "#e5e7eb"}`, background: f.showInFooter ? "#fffbeb" : "#fff" }}>
+                    <input type="checkbox" checked={!!f.showInFooter} onChange={e => updF("showInFooter", e.target.checked)} style={{ accentColor: ACC, width: 14, height: 14 }} />
+                    <span style={{ fontWeight: f.showInFooter ? 600 : 400, color: f.showInFooter ? DARK : "#6b7280" }}>📋 Formulario en Footer</span>
+                  </label>
+                </div>
+              </div>
+
               {/* Type toggle */}
               <div style={{ marginBottom: 12 }}>
                 <label style={{ fontSize: 10, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".5px", display: "block", marginBottom: 5 }}>Tipo de formulario</label>
@@ -1204,7 +1242,7 @@ const LivePreview = ({ data }) => {
   const s = data.struct || "clasica";
   const F = false;
   const P = "24px";
-  const hH = s === "clasica" ? 280 : 220;
+  const hH = (data.form && data.form.showInHero) ? 280 : 220;
 
   return (
     <div style={{ fontFamily: "'Segoe UI',sans-serif", width: "100%" }}>
@@ -1227,7 +1265,7 @@ const LivePreview = ({ data }) => {
         <div style={{ position: "absolute", bottom: 8, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 4 }}>
           {slides.map((_, i) => <div key={i} onClick={() => setSlideIdx(i)} style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff", opacity: i === slideIdx ? 1 : 0.4, cursor: "pointer" }} />)}
         </div>
-        {s === "clasica" ? (
+        {(data.form && data.form.showInHero) ? (
           <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: `0 ${P}`, gap: 14 }}>
             <div style={{ flex: 1, textAlign: "left" }}>
               <h1 style={{ color: "#fff", fontSize: 19, fontWeight: 700, marginBottom: 7, lineHeight: 1.2 }}>{data.hero.title}</h1>
@@ -1443,36 +1481,58 @@ const LivePreview = ({ data }) => {
 
       {/* Footer */}
       <footer style={{ background: data.footer.bgColor, padding: `22px ${P} 12px` }}>
-        {s === "profesional" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 12 }}>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{data.header.logoText}</div>
-              <p style={{ color: data.footer.textColor, fontSize: 9, lineHeight: 1.65, marginBottom: 10 }}>{data.footer.desc}</p>
-              <div style={{ fontSize: 9, color: data.footer.textColor, marginBottom: 3 }}>📍 {data.footer.address}</div>
-              <div style={{ fontSize: 9, color: data.footer.textColor }}>{data.footer.email}</div>
+        {(() => {
+          const showFtrForm = data.form && data.form.showInFooter;
+          if (s === "profesional") {
+            return showFtrForm ? (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 12 }}>
+                <div>
+                  <div style={{ color: "#fff", fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{data.header.logoText}</div>
+                  <p style={{ color: data.footer.textColor, fontSize: 9, lineHeight: 1.65, marginBottom: 10 }}>{data.footer.desc}</p>
+                  <div style={{ fontSize: 9, color: data.footer.textColor, marginBottom: 3 }}>📍 {data.footer.address}</div>
+                  <div style={{ fontSize: 9, color: data.footer.textColor }}>{data.footer.email}</div>
+                </div>
+                <div><ProForm form={data.form} compact={true} /></div>
+              </div>
+            ) : (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ color: "#fff", fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{data.header.logoText}</div>
+                <p style={{ color: data.footer.textColor, fontSize: 9, lineHeight: 1.65, marginBottom: 10 }}>{data.footer.desc}</p>
+                <div style={{ fontSize: 9, color: data.footer.textColor, marginBottom: 3 }}>📍 {data.footer.address}</div>
+                <div style={{ fontSize: 9, color: data.footer.textColor }}>{data.footer.email}</div>
+              </div>
+            );
+          }
+          return showFtrForm ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 12 }}>
+              <div>
+                <div style={{ color: "#fff", fontWeight: 700, fontSize: 12, marginBottom: 6 }}>{data.footer.company}</div>
+                <p style={{ color: data.footer.textColor, fontSize: 9, lineHeight: 1.65, marginBottom: 8 }}>{data.footer.desc}</p>
+                <div style={{ color: data.footer.textColor, fontSize: 8, marginBottom: 3 }}>{data.footer.email}</div>
+                <div style={{ color: data.footer.textColor, fontSize: 8, marginBottom: 3 }}>{data.footer.phone}</div>
+                <div style={{ color: data.footer.textColor, fontSize: 8 }}>{data.footer.address}</div>
+              </div>
+              <div><ProForm form={data.form} compact={true} /></div>
             </div>
-            <div>
-              <ProForm form={data.form} compact={true} />
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 16, marginBottom: 12 }}>
+              <div>
+                <div style={{ color: "#fff", fontWeight: 700, fontSize: 12, marginBottom: 6 }}>{data.footer.company}</div>
+                <p style={{ color: data.footer.textColor, fontSize: 9, lineHeight: 1.65 }}>{data.footer.desc}</p>
+              </div>
+              <div>
+                <div style={{ color: "#fff", fontWeight: 600, fontSize: 8, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Contacto</div>
+                <div style={{ color: data.footer.textColor, fontSize: 8, marginBottom: 3 }}>{data.footer.email}</div>
+                <div style={{ color: data.footer.textColor, fontSize: 8, marginBottom: 3 }}>{data.footer.phone}</div>
+                <div style={{ color: data.footer.textColor, fontSize: 8 }}>{data.footer.address}</div>
+              </div>
+              <div>
+                <div style={{ color: "#fff", fontWeight: 600, fontSize: 8, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Navegación</div>
+                {(data.header.menu || []).map((m, i) => <div key={i} style={{ marginBottom: 4 }}><a href={m.h} style={{ color: data.footer.textColor, fontSize: 8, textDecoration: "none", opacity: .8 }}>{m.l}</a></div>)}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 16, marginBottom: 12 }}>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 12, marginBottom: 6 }}>{data.footer.company}</div>
-              <p style={{ color: data.footer.textColor, fontSize: 9, lineHeight: 1.65 }}>{data.footer.desc}</p>
-            </div>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 600, fontSize: 8, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Contacto</div>
-              <div style={{ color: data.footer.textColor, fontSize: 8, marginBottom: 3 }}>{data.footer.email}</div>
-              <div style={{ color: data.footer.textColor, fontSize: 8, marginBottom: 3 }}>{data.footer.phone}</div>
-              <div style={{ color: data.footer.textColor, fontSize: 8 }}>{data.footer.address}</div>
-            </div>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 600, fontSize: 8, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Navegación</div>
-              {(data.header.menu || []).map((m, i) => <div key={i} style={{ marginBottom: 4 }}><a href={m.h} style={{ color: data.footer.textColor, fontSize: 8, textDecoration: "none", opacity: .8 }}>{m.l}</a></div>)}
-            </div>
-          </div>
-        )}
+          );
+        })()}
         <div style={{ borderTop: "1px solid rgba(255,255,255,.1)", paddingTop: 8, textAlign: "center" }}>
           <span style={{ color: data.footer.textColor, fontSize: 8, opacity: .6 }}>{data.footer.copy}</span>
         </div>
