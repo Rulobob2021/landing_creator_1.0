@@ -535,7 +535,7 @@ const buildPreviewHTML = (d, full = false) => {
           </div>
         </div>
         <div class="container-fluid" style="padding:${full?"0 50px 32px":"0 20px 14px"}">
-          <div class="row g-3">
+          <div class="row g-3 justify-content-center">
             <div class="col-12 col-md-5">
               <div style="background:${u.programsBgColor||"#fff"};border-radius:${full?8:5}px;overflow:hidden">
                 <div style="background:${u.programsTitleBg||DARK};padding:${full?"10px 16px":"6px 10px"};text-align:center">
@@ -547,7 +547,7 @@ const buildPreviewHTML = (d, full = false) => {
                 </div>
               </div>
             </div>
-            <div class="col-12 col-md-7">
+            <div class="col-12 col-md-4 offset-md-3">
               ${unabForm(d.form)}
             </div>
           </div>
