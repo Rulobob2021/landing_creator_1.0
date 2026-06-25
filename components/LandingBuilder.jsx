@@ -16,7 +16,7 @@ const mkDefault = (struct = "clasica") => ({
   struct,
   utm: { source: "", medium: "", campaign: "", content: "", term: "" },
   header: {
-    logoText: "MiMarca", logoUrl: "", bgColor: DARK, textColor: "#ffffff",
+    logoText: "MiMarca", logoUrl: "", logoSize: 30, bgColor: DARK, textColor: "#ffffff",
     menu: [
       { l: "Inicio", h: "#hero" }, { l: "Servicios", h: "#services" },
       { l: "Nosotros", h: "#about" }, { l: "Contacto", h: "#footer" },
@@ -230,7 +230,7 @@ const buildPreviewHTML = (d, full = false) => {
   const hH = (d.form && d.form.showInHero) ? (full ? 520 : 280) : (full ? 460 : 220);
 
   const hdr = `<header style="background:${d.header.bgColor};padding:0 ${P};height:${full ? 58 : 44}px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100">
-    <span style="color:${d.header.textColor};font-weight:700;font-size:${full ? 19 : 13}px">${d.header.logoUrl ? `<img src="${d.header.logoUrl}" style="height:${full ? 30 : 22}px;object-fit:contain">` : d.header.logoText}</span>
+    <span style="color:${d.header.textColor};font-weight:700;font-size:${full ? 19 : 13}px">${d.header.logoUrl ? `<img src="${d.header.logoUrl}" style="height:${full ? (d.header.logoSize||30) : Math.round((d.header.logoSize||30)*0.73)}px;object-fit:contain">` : d.header.logoText}</span>
     <nav style="display:flex;gap:${full ? 20 : 12}px">${(d.header.menu || []).map(m => `<a href="${m.h}" style="color:${d.header.textColor};text-decoration:none;font-size:${full ? 13 : 10}px">${m.l}</a>`).join("")}</nav>
   </header>`;
 
@@ -524,7 +524,7 @@ const buildPreviewHTML = (d, full = false) => {
           <div class="row align-items-start g-2">
             <div class="col-8 col-md-9">
               <div style="display:flex;align-items:flex-start;gap:${full?18:10}px;flex-wrap:wrap">
-                ${d.header.logoUrl?`<img src="${d.header.logoUrl}" style="height:${full?80:48}px;object-fit:contain;border-radius:6px;background:rgba(255,255,255,0.15);padding:4px" alt="logo">`:`<div style="background:rgba(255,255,255,.2);border-radius:6px;padding:${full?"8px 14px":"5px 8px"};color:#fff;font-weight:700;font-size:${full?14:10}px;flex-shrink:0">${d.header.logoText}</div>`}
+                ${d.header.logoUrl?`<img src="${d.header.logoUrl}" style="height:${full?(d.header.logoSize||80):Math.round((d.header.logoSize||80)*0.6)}px;object-fit:contain;border-radius:6px;background:rgba(255,255,255,0.15);padding:4px" alt="logo">`:`<div style="background:rgba(255,255,255,.2);border-radius:6px;padding:${full?"8px 14px":"5px 8px"};color:#fff;font-weight:700;font-size:${full?14:10}px;flex-shrink:0">${d.header.logoText}</div>`}
                 <h1 style="color:#fff;font-size:${full?52:20}px;font-weight:900;line-height:1.1;margin:0;max-width:${full?520:220}px">${u.heroTitle||"Es momento de llegar más lejos"}</h1>
               </div>
             </div>
@@ -961,6 +961,12 @@ const EditorSidebar = ({ data, setData, onSave }) => {
           <Panel title="🏷 Logo y Colores">
             <Field label="Texto del Logo" value={data.header.logoText} onChange={v => upd("header", "logoText", v)} />
             <ImgField label="Logo (URL o subir imagen)" value={data.header.logoUrl} onChange={v => upd("header", "logoUrl", v)} />
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontSize: 10, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".5px", display: "block", marginBottom: 4 }}>Tamaño del logo — {data.header.logoSize || 30}px</label>
+              <input type="range" min="16" max="120" value={data.header.logoSize || 30}
+                onChange={e => upd("header", "logoSize", parseInt(e.target.value))}
+                style={{ width: "100%", accentColor: "#6366f1", cursor: "pointer" }} />
+            </div>
             <ColorRow label="Color de fondo" value={data.header.bgColor} onChange={v => upd("header", "bgColor", v)} />
             <ColorRow label="Color de texto" value={data.header.textColor} onChange={v => upd("header", "textColor", v)} />
           </Panel>
@@ -1473,7 +1479,7 @@ const LivePreview = ({ data }) => {
           <div style={{ padding: "14px 20px 10px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10, flex: 1, minWidth: 0 }}>
               {data.header.logoUrl
-                ? <img src={data.header.logoUrl} style={{ height: 48, objectFit: "contain", borderRadius: 6, background: "rgba(255,255,255,0.15)", padding: 4, flexShrink: 0 }} alt="logo" />
+                ? <img src={data.header.logoUrl} style={{ height: Math.round((data.header.logoSize || 80) * 0.6), objectFit: "contain", borderRadius: 6, background: "rgba(255,255,255,0.15)", padding: 4, flexShrink: 0 }} alt="logo" />
                 : <div style={{ background: "rgba(255,255,255,.2)", borderRadius: 6, padding: "5px 9px", color: "#fff", fontWeight: 700, fontSize: 10, flexShrink: 0 }}>{data.header.logoText}</div>
               }
               <h1 style={{ color: "#fff", fontSize: 20, fontWeight: 900, lineHeight: 1.1, margin: 0 }}>{u.heroTitle || "Es momento de llegar más lejos"}</h1>
@@ -1530,7 +1536,7 @@ const LivePreview = ({ data }) => {
       {/* Header */}
       <header style={{ background: data.header.bgColor, padding: `0 ${P}`, height: 44, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
         <span style={{ color: data.header.textColor, fontWeight: 700, fontSize: 13 }}>
-          {data.header.logoUrl ? <img src={data.header.logoUrl} style={{ height: 22, objectFit: "contain" }} alt="logo" /> : data.header.logoText}
+          {data.header.logoUrl ? <img src={data.header.logoUrl} style={{ height: Math.round((data.header.logoSize || 30) * 0.73), objectFit: "contain" }} alt="logo" /> : data.header.logoText}
         </span>
         <nav style={{ display: "flex", gap: 12 }}>
           {(data.header.menu || []).map((m, i) => <a key={i} href={m.h} style={{ color: data.header.textColor, textDecoration: "none", fontSize: 10 }}>{m.l}</a>)}
